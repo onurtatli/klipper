@@ -24,6 +24,7 @@ Frequently asked questions
 21. [Can I find out whether the printer has lost steps?](#can-i-find-out-whether-the-printer-has-lost-steps)
 22. [Why does Klipper report errors? I lost my print!](#why-does-klipper-report-errors-i-lost-my-print)
 23. [How do I upgrade to the latest software?](#how-do-i-upgrade-to-the-latest-software)
+24. [How do I uninstall klipper?](#how-do-i-uninstall-klipper)
 
 ### How can I donate to the project?
 
@@ -161,6 +162,18 @@ knowledge to install the system prerequisites for that particular
 machine. See the
 [install-octopi.sh](https://github.com/KevinOConnor/klipper/tree/master/scripts/install-octopi.sh)
 script for further information on the necessary Linux admin steps.
+
+If you are looking to run the Klipper host software on a low-end chip,
+then be aware that, at a minimum, a machine with "double precision
+floating point" hardware is required.
+
+If you are looking to run the Klipper host software on a shared
+general-purpose desktop or server class machine, then note that
+Klipper has some real-time scheduling requirements. If, during a
+print, the host computer also performs an intensive general-purpose
+computing task (such as defragmenting a hard drive, 3d rendering,
+heavy swapping, etc.), then it may cause Klipper to report print
+errors.
 
 Note: If you are not using an OctoPi image, be aware that several
 Linux distributions enable a "ModemManager" (or similar) package that
@@ -531,3 +544,13 @@ modify the printer configuration.
 Note that the RESTART and FIRMWARE_RESTART g-code commands do not load
 new software - the above "sudo service klipper restart" and "make
 flash" commands are needed for a software change to take effect.
+
+### How do I uninstall Klipper?
+
+On the firmware end, nothing special needs to happen. Just follow the flashing directions for the new firmware.
+
+On the raspberry pi end, an uninstall script is available in [`scripts/klipper-uninstall.sh`](https://github.com/KevinOConnor/klipper/blob/master/scripts/klipper-uninstall.sh). Assuming you cloned `klipper` to `$HOME`
+```
+sudo ~/klipper/scripts/klipper-uninstall.sh
+rm -rf ~/klippy-env ~/klipper
+```

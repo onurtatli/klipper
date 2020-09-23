@@ -60,6 +60,11 @@ Klipper also supports the following standard G-Code commands if the
 - Set SD position: `M26 S<offset>`
 - Report SD print status: `M27`
 
+In addition, the following extended commands are availble when the
+"virtual_sdcard" config section is enabled.
+- Load a file and start SD print: `SDCARD_PRINT_FILE FILENAME=<filename>`
+- Unload file and clear SD state:  `SDCARD_RESET_FILE`
+
 ## G-Code arcs
 
 The following standard G-Code commands are available if a "gcode_arcs"
@@ -239,6 +244,13 @@ The following command is available when an "output_pin" config section
 is enabled:
 - `SET_PIN PIN=config_name VALUE=<value>`
 
+## Manually Controlled Fans Commands
+
+The following command is available when a "fan_generic" config section
+is enabled:
+- `SET_FAN_SPEED FAN=config_name SPEED=<speed>` This command sets
+  the speed of a fan. <speed> must be between 0.0 and 1.0.
+
 ## Neopixel and Dotstar Commands
 
 The following command is available when "neopixel" or "dotstar" config
@@ -258,8 +270,9 @@ sections are enabled:
 
 The following commands are available when a "servo" config section is
 enabled:
-- `SET_SERVO SERVO=config_name [WIDTH=<seconds>] [ENABLE=<0|1>]`
-- `SET_SERVO SERVO=config_name [ANGLE=<degrees>] [ENABLE=<0|1>]`
+- `SET_SERVO SERVO=config_name [ANGLE=<degrees> | WIDTH=<seconds>]`:
+  Set the servo position to the given angle (in degrees) or pulse
+  width (in seconds). Use `WIDTH=0` to disable the servo output.
 
 ## Manual stepper Commands
 
@@ -369,7 +382,8 @@ section is enabled:
 
 The following commands are available when the "bed_mesh" config
 section is enabled:
-- `BED_MESH_CALIBRATE [METHOD=manual] [<probe_parameter>=<value>]`:
+- `BED_MESH_CALIBRATE [METHOD=manual] [<probe_parameter>=<value>]
+  [<mesh_parameter>=<value>]`:
   This command probes the bed using generated points specified by the
   parameters in the config. After probing, a mesh is generated and
   z-movement is adjusted according to the mesh. See the PROBE command
@@ -475,13 +489,15 @@ section is enabled:
   the given distance (in mm) at the given constant velocity (in
   mm/s). If ACCEL is specified and is greater than zero, then the
   given acceleration (in mm/s^2) will be used; otherwise no
-  acceleration is performed. No boundary checks are performed; no
-  kinematic updates are made; other parallel steppers on an axis will
-  not be moved. Use caution as an incorrect command could cause
-  damage! Using this command will almost certainly place the low-level
-  kinematics in an incorrect state; issue a G28 afterwards to reset
-  the kinematics. This command is intended for low-level diagnostics
-  and debugging.
+  acceleration is performed. If acceleration is not performed then it
+  can lead to the micro-controller reporting "No next step" errors
+  (avoid these errors by specifying an ACCEL value or use a very low
+  VELOCITY). No boundary checks are performed; no kinematic updates
+  are made; other parallel steppers on an axis will not be moved. Use
+  caution as an incorrect command could cause damage! Using this
+  command will almost certainly place the low-level kinematics in an
+  incorrect state; issue a G28 afterwards to reset the kinematics.
+  This command is intended for low-level diagnostics and debugging.
 - `SET_KINEMATIC_POSITION [X=<value>] [Y=<value>] [Z=<value>]`: Force
   the low-level kinematic code to believe the toolhead is at the given
   cartesian position. This is a diagnostic and debugging command; use
@@ -611,3 +627,26 @@ been enabled:
     of SHAPER_TYPE_X and SHAPER_TYPE_Y parameters. See
     [example-extras.cfg](https://github.com/KevinOConnor/klipper/tree/master/config/example-extras.cfg)
     for more details on each of these parameters.
+
+## Temperature Fan Commands
+
+The following command is available when a "temperature_fan" config
+section is enabled:
+- `SET_TEMPERATURE_FAN_TARGET temperature_fan=<temperature_fan_name>
+  [target=<target_temperature>]`: Sets the target temperature for a
+  temperature_fan. If a target is not supplied, it is set to the
+  specified temperature in the config file.
+
+## Adxl345 Accelerometer Commands
+
+The following command is available when an "adxl345" config section is
+enabled:
+- `ACCELEROMETER_MEASURE [CHIP=<config_name>] [RATE=<value>]
+  [NAME=<value>]`: Starts accelerometer measurements at the requested
+  number of samples per second. If CHIP is not specified it defaults
+  to "default". Valid rates are 25, 50, 100, 200, 400, 800, 1600,
+  and 3200. If RATE is zero (or not specified) then the current series
+  of measurements are stopped and the results are written to a file
+  named `/tmp/adxl345-<name>.csv` where "<name>" is the optional NAME
+  parameter. If NAME is not specified it defaults to the current time
+  in "YYYYMMDD_HHMMSS" format.
